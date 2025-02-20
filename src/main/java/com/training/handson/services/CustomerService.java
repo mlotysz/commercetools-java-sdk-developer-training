@@ -8,8 +8,6 @@ import com.training.handson.dto.CustomFieldRequest;
 import com.training.handson.dto.CustomerCreateRequest;
 import io.vrap.rmf.base.client.ApiHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import io.vrap.rmf.base.client.ApiHttpResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;

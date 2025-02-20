@@ -79,7 +79,8 @@ public class CartService {
             final AddressRequest addressRequest) {
 
         // TODO: Set Shipping address on the cart
-        // TODO: Set default Shipping Method (update setShipping method, if needed)
+        // TODO: Set email on the cart
+        // TODO: Set default Shipping Method (update setShippingMethod, if needed)
         return CompletableFuture.completedFuture(
                 new ApiHttpResponse<>(501, null, Cart.of())
         );
@@ -107,7 +108,7 @@ public class CartService {
                         .execute();
     }
 
-    public CompletableFuture<ApiHttpResponse<Cart>> setShipping(final ApiHttpResponse<Cart> cartApiHttpResponse) {
+    public CompletableFuture<ApiHttpResponse<Cart>> setShippingMethod(final ApiHttpResponse<Cart> cartApiHttpResponse) {
 
         final Cart cart = cartApiHttpResponse.getBody();
 

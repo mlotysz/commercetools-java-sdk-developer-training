@@ -2,13 +2,15 @@ package com.training.handson.services;
 
 import com.commercetools.api.client.ProjectApiRoot;
 import com.commercetools.api.models.custom_object.CustomObject;
-import com.commercetools.api.models.type.Type;
+import com.commercetools.api.models.type.*;
 import com.training.handson.dto.CustomObjectRequest;
 import io.vrap.rmf.base.client.ApiHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,12 +31,41 @@ public class CustomizationService {
             put("en-US", "Preferred Time");
         }};
 
-        // TODO: Define Custom Fields
-
-        // TODO: Create a new Custom Type with custom fields
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, Type.of())
+        // Define the fields
+        List<FieldDefinition> definitions = Arrays.asList(
+                FieldDefinitionBuilder.of()
+                        .name("instructions")
+                        .required(false)
+                        .label(lsb -> lsb.values(labelsForFieldInstructions))
+                        .type(CustomFieldStringType.of())
+                        .build(),
+                FieldDefinitionBuilder.of()
+                        .name("time")
+                        .required(false)
+                        .label(lsb -> lsb.values(labelsForFieldTime))
+                        .type(CustomFieldStringType.of())
+                        .build()
         );
+
+        // Define the name for the type
+        Map<String, String> nameForType = new HashMap<String, String>() {{
+            put("de-DE", "CT Delivery instructions");
+            put("en-US", "CT Delivery instructions");
+        }};
+
+        // Create the custom type asynchronously
+        return apiRoot
+                .types()
+                .post(
+                        typeDraftBuilder -> typeDraftBuilder
+                                .key("ct-delivery-instructions")
+                                .name(lsb -> lsb.values(nameForType))
+                                .resourceTypeIds(
+                                        ResourceTypeId.CUSTOMER,
+                                        ResourceTypeId.ORDER
+                                )
+                                .fieldDefinitions(definitions)
+                ).execute();
     }
 
 
@@ -42,6 +73,7 @@ public class CustomizationService {
             final String container,
             final String key) {
 
+        // Check the existence of the custom object with the container and the key
         return apiRoot
                 .customObjects()
                 .head()
@@ -59,18 +91,27 @@ public class CustomizationService {
     public CompletableFuture<ApiHttpResponse<CustomObject>> createCustomObject(
             final CustomObjectRequest customObjectRequest) {
 
-        // TODO: Create a new Custom Object with container and key values from the request
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, CustomObject.of()));
+        // Create a new Custom Object with container and key values from the request
+        Map<String, Object> jsonObject = new HashMap<>();
+
+        return apiRoot.customObjects()
+                .post(customObjectDraftBuilder -> customObjectDraftBuilder
+                        .container(customObjectRequest.getContainer())
+                        .key(customObjectRequest.getKey())
+                        .value(jsonObject))
+                .execute();
     }
 
     public CompletableFuture<ApiHttpResponse<CustomObject>> getCustomObjectWithContainerAndKey(
             final String container,
             final String key) {
 
-        // TODO: Return the Custom Object with container and key values from the request
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, CustomObject.of()));
+        // Return the Custom Object with container and key values from the request
+        return apiRoot
+                .customObjects()
+                .withContainerAndKey(container, key)
+                .get()
+                .execute();
     }
 
     public CompletableFuture<ApiHttpResponse<CustomObject>> appendToCustomObject(
@@ -78,11 +119,12 @@ public class CustomizationService {
             final String key,
             final Map<String, Object> jsonObject) {
 
-        return getCustomObjectWithContainerAndKey(container, key)
+        return getCustomObjectWithContainerAndKey(container, key) // Get the custom object with current list of subscribers
                 .thenCompose(customObjectApiHttpResponse -> {
                     Map<String, Object> currentSubscribers = (Map<String, Object>) customObjectApiHttpResponse.getBody().getValue();
-                    currentSubscribers.putAll(jsonObject);
+                    currentSubscribers.putAll(jsonObject); // Add the new subscriber to the list
 
+                    // Update the custom object
                     return apiRoot.customObjects()
                             .post(customObjectDraftBuilder -> customObjectDraftBuilder
                                     .container(container)
