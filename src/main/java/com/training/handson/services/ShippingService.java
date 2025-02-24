@@ -14,11 +14,14 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class ShippingService {
 
-    @Autowired
-    private ProjectApiRoot apiRoot;
+    private final ProjectApiRoot apiRoot;
 
-    @Autowired
-    private String storeKey;
+    private final String storeKey;
+
+    public ShippingService(ProjectApiRoot apiRoot, String storeKey) {
+        this.apiRoot = apiRoot;
+        this.storeKey = storeKey;
+    }
 
     public CompletableFuture<ApiHttpResponse<ShippingMethodPagedQueryResponse>> getShippingMethods() {
 
@@ -30,26 +33,29 @@ public class ShippingService {
     }
 
     public CompletableFuture<ApiHttpResponse<ShippingMethod>> getShippingMethodByKey(String key) {
-        // TODO: Return a list of shipping methods valid for a country
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, ShippingMethod.of())
-        );
+        return apiRoot
+                .shippingMethods()
+                .withKey(key)
+                .get()
+                .withExpand("zoneRates[*].zone")
+                .execute();
     }
 
     public CompletableFuture<ApiHttpResponse<ShippingMethodPagedQueryResponse>> getShippingMethodsByCountry(String countryCode) {
-
-        // TODO: Return a list of shipping methods valid for a country
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, ShippingMethodPagedQueryResponse.of())
-        );
+        return apiRoot
+                .shippingMethods()
+                .matchingLocation()
+                .get()
+                .addCountry(countryCode)
+                .withExpand("zoneRates[*].zone")
+                .execute();
     }
 
     public CompletableFuture<ApiHttpResponse<JsonNode>> checkShippingMethodExistence(String key) {
-
-        // TODO: Return true if a shipping method by key exists
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, JsonUtils.toJsonNode("{}"))
-        );
+        return apiRoot
+                .shippingMethods()
+                .withKey(key)
+                .head()
+                .execute();
     }
-
 }

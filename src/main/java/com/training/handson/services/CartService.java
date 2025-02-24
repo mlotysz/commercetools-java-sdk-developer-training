@@ -2,33 +2,38 @@ package com.training.handson.services;
 
 import com.commercetools.api.client.ProjectApiRoot;
 import com.commercetools.api.models.cart.Cart;
+import com.commercetools.api.models.cart.CartDraftBuilder;
+import com.commercetools.api.models.cart.LineItemDraft;
+import com.commercetools.api.models.cart.LineItemDraftBuilder;
 import com.commercetools.api.models.shipping_method.ShippingMethod;
 import com.training.handson.dto.AddressRequest;
 import io.vrap.rmf.base.client.ApiHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Service
 public class CartService {
 
-    @Autowired
-    private ProjectApiRoot apiRoot;
+    private final ProjectApiRoot apiRoot;
+    private final String storeKey;
 
-    @Autowired
-    private String storeKey;
+    public CartService(ProjectApiRoot apiRoot, String storeKey) {
+        this.apiRoot = apiRoot;
+        this.storeKey = storeKey;
+    }
 
     public CompletableFuture<ApiHttpResponse<Cart>> getCartById(final String cartId) {
 
-            return apiRoot
-                    .inStore(storeKey)
-                    .carts()
-                    .withId(cartId)
-                    .get()
-                    .execute();
+        return apiRoot
+                .inStore(storeKey)
+                .carts()
+                .withId(cartId)
+                .get()
+                .execute();
     }
-
 
     public CompletableFuture<ApiHttpResponse<Cart>> createAnonymousCart(
             final String sku,
@@ -36,14 +41,22 @@ public class CartService {
 //            final String supplyChannelKey,
 //            final String distChannelKey
     ) {
-
-        // TODO: Create a cart with anonymousId and add SKU as a line item
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, Cart.of())
-        );
+        return apiRoot
+                .inStore(storeKey)
+                .carts()
+                .post(CartDraftBuilder.of()
+                        .currency("USD")
+                        .country("US")
+                        .lineItems(List.of(
+                                LineItemDraftBuilder.of()
+                                        .sku(sku)
+                                        .quantity(quantity)
+                                        .build()))
+                        .build())
+                .execute();
     }
 
-    private String getCurrencyCodeByCountry(final String countryCode){
+    private String getCurrencyCodeByCountry(final String countryCode) {
         return switch (countryCode) {
             case "US" -> "USD";
             case "UK" -> "GBP";
@@ -113,30 +126,30 @@ public class CartService {
         final Cart cart = cartApiHttpResponse.getBody();
 
         final ShippingMethod shippingMethod =
-            apiRoot
-                .shippingMethods()
-                .matchingCart()
-                .get()
-                .withCartId(cart.getId())
-                .executeBlocking()
-                .getBody().getResults().get(0);
+                apiRoot
+                        .shippingMethods()
+                        .matchingCart()
+                        .get()
+                        .withCartId(cart.getId())
+                        .executeBlocking()
+                        .getBody().getResults().get(0);
         return apiRoot
-            .inStore(storeKey)
-            .carts()
-            .withId(cart.getId())
-            .post(
-                cartUpdateBuilder -> cartUpdateBuilder
-                    .version(cart.getVersion())
-                    .plusActions(
-                        cartUpdateActionBuilder -> cartUpdateActionBuilder
-                            .setShippingMethodBuilder()
-                            .shippingMethod(
-                                shippingMethodResourceIdentifierBuilder -> shippingMethodResourceIdentifierBuilder
-                                    .id(shippingMethod.getId())
-                            )
-                    )
-            )
-            .execute();
+                .inStore(storeKey)
+                .carts()
+                .withId(cart.getId())
+                .post(
+                        cartUpdateBuilder -> cartUpdateBuilder
+                                .version(cart.getVersion())
+                                .plusActions(
+                                        cartUpdateActionBuilder -> cartUpdateActionBuilder
+                                                .setShippingMethodBuilder()
+                                                .shippingMethod(
+                                                        shippingMethodResourceIdentifierBuilder -> shippingMethodResourceIdentifierBuilder
+                                                                .id(shippingMethod.getId())
+                                                )
+                                )
+                )
+                .execute();
     }
 
 }
