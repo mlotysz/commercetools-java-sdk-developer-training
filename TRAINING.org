@@ -1,0 +1,19 @@
+#+title: [[https://commercetools.com/training/java-developer][Java developer training]]
+
+* DONE Setup
+
+1. Install zoom and setup sharing, verify.
+
+2. Get access to: https://learn.commercetools.com/ (reset pw after your
+   invitation) and then to [[https://docs.commercetools.com/docs/learning][learning center]] (login)
+
+3. Access to: [[https://mc.europe-west1.gcp.commercetools.com/training-java-20250224-dev/welcome][training project welcome page]] (create ct project with sample
+   configuration and data)
+
+4. Generate token for an API for CT project: [[https://mc.europe-west1.gcp.commercetools.com/training-java-20250224-dev/settings/developer/api-clients][training-java-20250224-dev]]
+
+5. Fork GitHub repository:
+   [[https://github.com/commercetools/commercetools-java-sdk-developer-training][commercetools/commercetools-java-sdk-developer-training]] build and run the
+   app: [[https://github.com/mlotysz/commercetools-java-sdk-developer-training][mlotysz/commercetools-java-sdk-developer-training]]
+
+6. Open: [[http://localhost:8080/][localhost:8080]]
