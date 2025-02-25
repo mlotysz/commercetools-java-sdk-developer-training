@@ -1,27 +1,35 @@
 #+title: [[https://commercetools.com/training/java-developer][Java developer training]]
 
-* DONE Setup
+* Setup
 
 1. Install zoom and setup sharing, verify.
 2. Get access to: https://learn.commercetools.com/ (reset pw after your
-   invitation) and then to [[https://docs.commercetools.com/docs/learning][learning center]] (login)
+   invitation) and then to [[https://docs.commercetools.com/docs/learning][learning center]] (login).
 3. Access to: [[https://mc.europe-west1.gcp.commercetools.com/training-java-20250224-dev/welcome][training project welcome page]] (create ct project with sample
-   configuration and data)
+   configuration and data).
 4. Generate token for an API for CT project: [[https://mc.europe-west1.gcp.commercetools.com/training-java-20250224-dev/settings/developer/api-clients][training-java-20250224-dev]]
 5. Fork GitHub repository:
-   [[https://github.com/commercetools/commercetools-java-sdk-developer-training][commercetools/commercetools-java-sdk-developer-training]] build and run the
-   app: [[https://github.com/mlotysz/commercetools-java-sdk-developer-training][mlotysz/commercetools-java-sdk-developer-training]]
-6. Open: [[http://localhost:8080/][localhost:8080]]
+   [[https://github.com/commercetools/commercetools-java-sdk-developer-training][commercetools/commercetools-java-sdk-developer-training]] build and run the.
+   app: [[https://github.com/mlotysz/commercetools-java-sdk-developer-training][mlotysz/commercetools-java-sdk-developer-training]].
+6. Open: [[http://localhost:8080/][localhost:8080]].
 
-* DONE Day 1 - explore the platform
+* Day 1 - explore the platform
 
 1. Use documentation and add missing implementation for shipping group.
 2. Take quiz at [[https://learn.commercetools.com/my/courses.php][my cources in portal]]
-
 3. Product model in the platform, stores, projections, tailoring.
 4. Add missing implementation for product search.
 5. Take [[https://learn.commercetools.com/mod/quiz/view.php?id=1524][the quiz]].
-
 6. Cart, model, channels.
 7. Add cart creation example.
 8. Take [[https://learn.commercetools.com/mod/quiz/view.php?id=1525][the quiz]].
+
+* Day 2 - cart, discounts, shipping, inventory modes, singinin, order, custom fields, custom object
+
+1. Apply product and cart discounts.
+2. Set shipping mode address and take [[https://learn.commercetools.com/mod/quiz/view.php?id=1526][the quiz]].
+3. Inventory modes.
+4. Siging in.
+5. Anonymous cart to customer cart sigin modes.
+6. Creating order.
+7. Add custom fields to an order.

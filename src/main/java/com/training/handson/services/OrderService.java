@@ -5,6 +5,7 @@ import com.commercetools.api.models.order.Order;
 import com.training.handson.dto.CustomFieldRequest;
 import com.training.handson.dto.OrderRequest;
 import io.vrap.rmf.base.client.ApiHttpResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,30 +14,53 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class OrderService {
 
-    @Autowired
-    private ProjectApiRoot apiRoot;
+    private final ProjectApiRoot apiRoot;
+    private final String storeKey;
 
-    @Autowired
-    private String storeKey;
+    public OrderService(ProjectApiRoot apiRoot, String storeKey) {
+        this.apiRoot = apiRoot;
+        this.storeKey = storeKey;
+    }
 
     public CompletableFuture<ApiHttpResponse<Order>> createOrder(
             final OrderRequest orderRequest) {
+        return apiRoot.inStore(storeKey)
+                .orders()
+                .post(orderFromCartDraftBuilder -> orderFromCartDraftBuilder
+                        .cart(builder -> builder.id(orderRequest.getCartId()))
+                        .version(orderRequest.getCartVersion())
+                        .orderNumber("ML-" + System.currentTimeMillis())
+                )
 
-        // TODO: Create an order using the cardId and version in the request
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, Order.of())
-        );
+                .execute();
     }
 
     public CompletableFuture<ApiHttpResponse<Order>> setCustomFields(
             final CustomFieldRequest customFieldRequest) {
 
         final String orderNumber = customFieldRequest.getOrderNumber();
-
-        // TODO: Update the order with custom delivery instructions
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, Order.of())
-        );
+        return getOrderByOrderNumber(orderNumber)
+                .thenApply(ApiHttpResponse::getBody)
+                .thenComposeAsync(order -> {
+                    return apiRoot
+                            .inStore(storeKey)
+                            .orders()
+                            .withId(order.getId())
+                            .post(ou -> ou.version(order.getVersion())
+                                    .plusActions(oua -> oua.setCustomTypeBuilder()
+                                            .type(tri -> tri.key("ct-delivery-instructions"))
+                                    )
+                                    .plusActions(oua -> oua.setCustomFieldBuilder()
+                                            .name("instructions")
+                                            .value(customFieldRequest.getInstructions())
+                                    )
+                                    .plusActions(oua -> oua.setCustomFieldBuilder()
+                                            .name("time")
+                                            .value(customFieldRequest.getTime())
+                                    )
+                            )
+                            .execute();
+                });
     }
 
     public CompletableFuture<ApiHttpResponse<Order>> getOrderByOrderNumber(final String orderNumber) {

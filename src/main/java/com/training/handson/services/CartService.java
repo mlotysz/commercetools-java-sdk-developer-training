@@ -3,12 +3,16 @@ package com.training.handson.services;
 import com.commercetools.api.client.ProjectApiRoot;
 import com.commercetools.api.models.cart.Cart;
 import com.commercetools.api.models.cart.CartDraftBuilder;
-import com.commercetools.api.models.cart.LineItemDraft;
+import com.commercetools.api.models.cart.CartSetShippingAddressAction;
+import com.commercetools.api.models.cart.CartUpdateActionBuilder;
 import com.commercetools.api.models.cart.LineItemDraftBuilder;
+import com.commercetools.api.models.common.Address;
+import com.commercetools.api.models.common.AddressBuilder;
 import com.commercetools.api.models.shipping_method.ShippingMethod;
+import com.commercetools.api.models.shipping_method.ShippingMethodResourceIdentifier;
+import com.commercetools.api.models.shipping_method.ShippingMethodResourceIdentifierBuilder;
 import com.training.handson.dto.AddressRequest;
 import io.vrap.rmf.base.client.ApiHttpResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -72,32 +76,81 @@ public class CartService {
 //            final String distChannelKey
     ) {
 
-        // TODO: Add SKU to the cart
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, Cart.of())
-        );
+        return getCartById(cartId)
+                .thenApply(ApiHttpResponse::getBody)
+                .thenComposeAsync(cart ->
+                        apiRoot.inStore(storeKey)
+                                .carts()
+                                .withId(cartId)
+                                .post(cartUpdateBuilder ->
+                                        cartUpdateBuilder
+                                                .version(cart.getVersion())
+                                                .plusActions(cartUpdateActionBuilder ->
+                                                        cartUpdateActionBuilder.addLineItemBuilder()
+                                                                .sku(sku)
+                                                                .quantity(quantity)))
+                                .execute());
     }
 
     public CompletableFuture<ApiHttpResponse<Cart>> addDiscountToCart(
             final String cartId,
             final String code) {
 
-        // TODO: Set Discount code in the cart
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, Cart.of())
-        );
+        return getCartById(cartId)
+                .thenApply(ApiHttpResponse::getBody)
+                .thenComposeAsync(cart ->
+                        apiRoot.inStore(storeKey)
+                                .carts()
+                                .withId(cartId)
+                                .post(cartUpdateBuilder ->
+                                        cartUpdateBuilder
+                                                .version(cart.getVersion())
+                                                .plusActions(cartUpdateActionBuilder ->
+                                                        cartUpdateActionBuilder.addDiscountCodeBuilder()
+                                                                .code(code)))
+                                .execute());
     }
 
     public CompletableFuture<ApiHttpResponse<Cart>> setShippingAddress(
             final AddressRequest addressRequest) {
 
-        // TODO: Set Shipping address on the cart
-        // TODO: Set email on the cart
-        // TODO: Set default Shipping Method (update setShippingMethod, if needed)
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, Cart.of())
-        );
+        var address = AddressBuilder.of()
+                .firstName(addressRequest.getFirstName())
+                .lastName(addressRequest.getLastName())
+                .country(addressRequest.getCountry())
+                .email(addressRequest.getEmail())
+                .build();
+        var cartId = addressRequest.getCartId();
 
+        ShippingMethod shippingMethod = apiRoot.shippingMethods()
+                .matchingLocation()
+                .get()
+                .addCountry(addressRequest.getCountry())
+                .executeBlocking().getBody().getResults().get(0);
+
+        return getCartById(cartId)
+                .thenApply(ApiHttpResponse::getBody)
+                .thenComposeAsync(cart ->
+                        apiRoot.inStore(storeKey)
+                                .carts()
+                                .withId(cartId)
+                                .post(cartUpdateBuilder ->
+                                        cartUpdateBuilder
+                                                .version(cart.getVersion())
+                                                .plusActions(cartUpdateActionBuilder ->
+                                                        cartUpdateActionBuilder
+                                                                .setShippingAddressBuilder()
+                                                                .address(address))
+                                                .plusActions(cartUpdateActionBuilder ->
+                                                        cartUpdateActionBuilder
+                                                                .setCustomerEmailBuilder()
+                                                                .email(address.getEmail()))
+                                                .plusActions(cartUpdateActionBuilder -> cartUpdateActionBuilder
+                                                        .setShippingMethodBuilder()
+                                                        .shippingMethod(ShippingMethodResourceIdentifierBuilder.of()
+                                                                .id(shippingMethod.getId())
+                                                                .build())))
+                                .execute());
     }
 
 
