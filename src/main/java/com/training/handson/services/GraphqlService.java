@@ -15,16 +15,29 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class GraphqlService {
 
-    @Autowired
-    private ProjectApiRoot apiRoot;
+    private final ProjectApiRoot apiRoot;
 
+    public GraphqlService(ProjectApiRoot apiRoot) {
+        this.apiRoot = apiRoot;
+    }
 
     public CompletableFuture<ApiHttpResponse<GraphQLResponse<OrderQueryResult>>> getOrderSummaryByEmail(final String customerEmail) {
 
-        // TODO: Use GraphQL Explorer to build a query that returns orders for the email in the request.
-        // TODO: including customer's name
-
-        String query = "";
+        String query = "query($where:String!)  {\n" +
+                "  orders(where: $where) {\n" +
+                "    results {\n" +
+                "      customerEmail\n" +
+                "       customer {\n" +
+                "       firstName\n" +
+                "       lastName\n" +
+                "       }\n" +
+                "      lineItems {\n" +
+                "        name(locale: \"en-US\")\n" +
+                "      }\n" +
+                "      CartTotal: totalPrice {centAmount currencyCode}\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
 
         // Create the GraphQL request
         GraphQLRequest<OrderQueryResult> graphQLRequest = GraphQL

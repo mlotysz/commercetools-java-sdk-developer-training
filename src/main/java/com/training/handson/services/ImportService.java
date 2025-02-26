@@ -22,17 +22,20 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class ImportService {
 
-    @Autowired
-    private ProjectApiRoot apiRoot;
+    private final ProjectApiRoot apiRoot;
+
+    public ImportService(ProjectApiRoot apiRoot) {
+        this.apiRoot = apiRoot;
+    }
 
     public CompletableFuture<ApiHttpResponse<ImportResponse>> importProductsFromCsv(
             final MultipartFile csvFile) {
 
-        // TODO: Import products from the csv file
-        // TODO: Update and use getProductImportsFromCsv method to parse the csv file
-        return CompletableFuture.completedFuture(
-                new ApiHttpResponse<>(501, null, ImportResponse.of())
-        );
+        return apiRoot.products()
+                .importContainers()
+                .withImportContainerKeyValue("mlo-import-container")
+                .post(productImportRequestBuilder -> productImportRequestBuilder.resources(getProductImportsFromCsv(csvFile)))
+                .execute();
     }
 
     private List<ProductImport> getProductImportsFromCsv(final MultipartFile csvFile) {
@@ -56,13 +59,11 @@ public class ImportService {
                             .slug(slug)
                             .build();
                     productImports.add(productImport);
-                }
-                else {
+                } else {
                     System.out.println("skipping line");
                 }
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.err.println(e);
         }
         return productImports;
@@ -72,7 +73,7 @@ public class ImportService {
         return
                 apiRoot
                         .importContainers()
-                        .withImportContainerKeyValue("my-import-container")
+                        .withImportContainerKeyValue(containerKey)
                         .importSummaries()
                         .get()
                         .execute();

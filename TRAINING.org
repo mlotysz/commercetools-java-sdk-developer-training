@@ -24,12 +24,70 @@
 7. Add cart creation example.
 8. Take [[https://learn.commercetools.com/mod/quiz/view.php?id=1525][the quiz]].
 
-* Day 2 - cart, discounts, shipping, inventory modes, singinin, order, custom fields, custom object
+* Day 2 - cart, discounts, shipping, inventory modes, signing in, order, custom fields, custom object
 
 1. Apply product and cart discounts.
 2. Set shipping mode address and take [[https://learn.commercetools.com/mod/quiz/view.php?id=1526][the quiz]].
 3. Inventory modes.
-4. Siging in.
-5. Anonymous cart to customer cart sigin modes.
-6. Creating order.
+4. Customer signing in.
+5. Anonymous cart to customer cart conversion and signing modes.
+6. Creating an example order.
 7. Add custom fields to an order.
+
+* Day 3 states, import API, GraphQL, connectors
+
+1. Custom state machines for extending statuses.
+2. take [[https://learn.commercetools.com/mod/quiz/view.php?id=1528][the quiz]].
+3. Merchant center import/export/bulk update/delete.
+4. Copy data between project with some limitation ([[https://github.com/commercetools/commercetools-project-sync][repo]]).
+5. A bit outdated java sync library ([[https://github.com/commercetools/commercetools-sync-java][repo]]).
+6. Import API implementation example.
+7. GraphQL and sample query implementation. Profiler, documentation and
+   performance, limits.
+
+** Connector/extension
+
+- Connector example applications using: [[https://github.com/commercetools/commercetools-dev-training-connector-template][forked template project]] ([[https://github.com/mlotysz/commercetools-dev-training-connector-template][repo]]).
+- Build and deploy applications.
+- Postman collection [[git@github.com:mlotysz/commercetools-postman-collection-training.git][repo]].
+- api token (scopes: https://github.com/commercetools/commercetools-dev-training-connector-template/blob/main/README.md)
+
+manage_customers
+manage_products
+manage_categories
+view_tax_categories
+manage_api_clients
+manage_connectors
+manage_connectors_deployments
+
+- Import env to postman, make active
+- test it: https://web.postman.co/workspace/c4319610-693a-4120-8d69-dfe6be73ee3f/request/41752946-f9836555-4517-4151-be9c-63725637b6a9?action=share&source=copy-link&creator=41752946&active-environment=872f5a89-65ae-4a0e-b8e5-37e05b878f3e (get a token)
+- Add missing impl. for updateAction, setup .env (get it from CT)
+- yarn build
+- yarn start:dev
+- create customer
+
+curl --location 'http://localhost:8080/assign-customer-number' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer D3nmDtqReBvIADNPHlaDvREyDvyAkk13' \
+--data-raw '{
+    "action": "Create",
+    "resource": {
+        "typeId": "customer",
+        "id": "null",
+        "obj": {"customer":{"id":"dc49d079-c9c5-4c56-868e-48339c572196","version":1,"versionModifiedAt":"2025-02-26T16:23:27.238Z","lastMessageSequenceNumber":1,"createdAt":"2025-02-26T16:23:27.238Z","lastModifiedAt":"2025-02-26T16:23:27.238Z","lastModifiedBy":{"clientId":"dpErQB57FIA_dEsY3kQnm3UI","isPlatformClient":false},"createdBy":{"clientId":"dpErQB57FIA_dEsY3kQnm3UI","isPlatformClient":false},"email":"john@lotysz.com","firstName":"Maciej","lastName":"Łotysz","password":"****DS8=","addresses":[],"shippingAddressIds":[],"billingAddressIds":[],"isEmailVerified":false,"stores":[],"authenticationMode":"Password"}}
+    }
+}'
+
+response:
+
+{"actions":[{"action":"setCustomerNumber","customerNumber":"1462"}]}
+
+- commit push release
+- run create connectordraft or in merchant center
+- do deployment of connector (there is cli)
+- open telementry - spring boot example project
+
+* Presentation
+
+[[https://learn.commercetools.com/pluginfile.php/15047/mod_resource/content/7/DeveloperCourse_Java%2BNET%2BJS_20240305.pdf][the link]]

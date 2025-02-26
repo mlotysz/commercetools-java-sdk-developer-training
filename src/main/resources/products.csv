@@ -1,3 +1,4 @@
 productKey,productType,productName,productSlug
-red-wine,drink-product-type,Red Wine,red-wine
-white-wine,drink-product-type,White Wine,white-wine
+mlo-whiskey,drink-product-type,Ballantines,mlo-whiskey
+mlo-red-wine,drink-product-type,Red Wine for Me,mlo-red-wine
+mlo-white-wine,drink-product-type,White Wine,mlo-white-wine
